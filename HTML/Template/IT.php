@@ -389,8 +389,11 @@ class HTML_Template_IT
     var $_options = array(
         'preserve_data' => false,
         'use_preg'      => true,
-        'preserve_input'=> true
+        'preserve_input'=> true,
+        'check_placeholder_exists' => true,
     );
+
+    public static $globalOptions = [];
 
     /**
      * Builds some complex regular expressions and optionally sets the
@@ -408,6 +411,9 @@ class HTML_Template_IT
      */
      function __construct($root = '', $options = null)
     {
+        if (!empty(self::$globalOptions)) {
+            $this->setOptions(self::$globalOptions);
+        }
         if (!is_null($options)) {
             $this->setOptions($options);
         }
@@ -479,6 +485,16 @@ class HTML_Template_IT
         }
 
         return IT_OK;
+    }
+
+    /**
+     * Define global options used for all new instances.
+     * options defined using constructor parameter will overwrite
+     * globalOptions
+     */
+    public static function setGlobalOptions($options)
+    {
+        self::$globalOptions = $options;
     }
 
     /**
@@ -766,7 +782,7 @@ class HTML_Template_IT
                 $this->setVariable($key, $value);
             }
         } else {
-            if ($this->checkPlaceholderExists($this->currentBlock, $variable)) {
+            if (!$this->_options['check_placeholder_exists'] ||  $this->checkPlaceholderExists($this->currentBlock, $variable)) {
                 $this->variableCache[$variable] = $value;
             }
         }
